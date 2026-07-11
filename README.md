@@ -44,3 +44,45 @@ Once all dependencies are installed and the environment is active, navigate to t
 ```bash
 make
 ```
+
+### 5. Build and visualize the .tex based PDF 
+After compilation, you can better visualize the project by creating a well-formatted .pdf file.
+
+To build the PDF file:
+
+```bash
+make doc
+```
+
+To visualize the PDF file:
+
+```bash
+make pdf
+```
+
+## Repo Organization
+
+The project follows two key version control system best practices that must be followed when contributing:
+
+- [Conventional Branch](https://conventional-branch.github.io/)
+- [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/)### 5. Build and visualize the .tex based PDF 
+After compilation, you can better visualize the project by creating a well-formatted .pdf file.
+
+To build the PDF file:
+
+```bash
+make doc
+```
+
+To visualize the PDF file:
+
+```bash
+make pdf
+```
+
+## Repo Organization
+
+The project follows two key version control system best practices that must be followed when contributing:
+
+- [Conventional Branch](https://conventional-branch.github.io/)
+- [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/)
