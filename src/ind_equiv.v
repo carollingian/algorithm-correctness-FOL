@@ -1,5 +1,39 @@
+(** * Equivalência entre diferentes noções de indução
+
+    Projeto de Lógica Computacional 1 (2026/1) — Tema 5
+
+    Este arquivo formaliza a equivalência entre três princípios sobre os
+    números naturais:
+
+    - PIM: Princípio da Indução Matemática;
+    - PIF: Princípio da Indução Forte (ou completa);
+    - PBO: Princípio da Boa Ordenação.
+
+    A equivalência é estabelecida pelos teoremas [PIM_equiv_PIF],
+    [PBO_equiv_PIM] e [PBO_equiv_PIF].
+
+    Estrutura: cada parte possui um "lema-núcleo" que concentra o
+    argumento matemático central, e lemas de implicação finos que apenas
+    o instanciam. Os teoremas finais são composições dessas implicações.
+
+    Ferramenta: Rocq (versão 9 ou superior). Caso seja utilizada uma
+    versão anterior (Coq 8.x), basta substituir as duas linhas de
+    importação abaixo por: [Require Import Arith Classical.] *)
+
 (* begin hide *)
 From Stdlib Require Import Arith.
+
+(* ADAPTAÇÃO DE CÓDIGO NECESSÁRIA PARA O PROJETO:
+   Importamos a biblioteca de Lógica Clássica, pois as demonstrações que
+   envolvem o Princípio da Boa Ordenação (PBO) requerem o Princípio do
+   Terceiro Excluído ([classic : forall P, P \/ ~P]) e a eliminação da
+   dupla negação ([NNPP : forall P, ~~P -> P]). Como o predicado
+   [P : nat -> Prop] é arbitrário (possivelmente indecidível), não é
+   possível, de forma puramente construtiva, decidir se [P] vale ou não
+   em um dado ponto, o que bloqueia a busca pelo elemento mínimo.
+
+   A importação usa o prefixo [Stdlib] (padrão do Rocq 9) para manter a
+   consistência com a importação de [Arith] acima. *)
 From Stdlib Require Import Classical.
 (* end hide *)
 
@@ -101,11 +135,66 @@ Proof.
   - apply PIF_implies_PIM.
 Qed.
 
+(** ** Parte 2: implicações envolvendo o PBO *)
 
-Theorem PBO_equiv_PIM: PBO <-> PIM.
-Proof. Admitted.
+(** Lema-núcleo da direção PIF -> PBO: por indução forte em [a],
+    provamos que qualquer testemunha [P a] garante a existência de um
+    menor natural satisfazendo [P]. No passo forte para [k], o Terceiro
+    Excluído ([classic]) decide se já existe alguma testemunha [j < k]:
+    - se existe, a hipótese de indução forte aplicada a [j] conclui;
+    - se não existe, o próprio [k] é o mínimo procurado, pois qualquer
+      [x < k] com [P x] contradiria a inexistência. *)
+Lemma PIF_encontra_minimo:
+  PIF ->
+  forall P : nat -> Prop,
+  forall a, P a ->
+    exists m, P m /\ forall x, x < m -> ~ P x.
+Proof.
+  intros HPIF P.
+  apply (HPIF (fun a => P a ->
+               exists m, P m /\ forall x, x < m -> ~ P x)).
+  intros k IH HPk.
+  destruct (classic (exists j, j < k /\ P j)) as [Hj | Hnj].
+  - (* Existe testemunha abaixo de k: a HI forte resolve. *)
+    destruct Hj as [j [Hjk HPj]].
+    exact (IH j Hjk HPj).
+  - (* Não existe testemunha abaixo de k: k é o mínimo. *)
+    exists k. split.
+    + exact HPk.
+    + intros x Hxk HPx.
+      apply Hnj.
+      exists x. split.
+      * exact Hxk.
+      * exact HPx.
+Qed.
 
-Theorem PBO_equiv_PIF: PBO <-> PIF.
-Proof. Admitted.
+Lemma PIF_implies_PBO: PIF -> PBO.
+Proof.
+  unfold PBO.
+  intros HPIF P Hex.
+  destruct Hex as [n HPn].
+  exact (PIF_encontra_minimo HPIF P n HPn).
+Qed.
 
-(** Repositório: %\url{https://github.com/flaviodemoura/ind_equiv}% *)
+(** Lema-núcleo das direções PBO -> PIM e PBO -> PIF: dado um
+    contraexemplo de [Q], o PBO aplicado ao predicado complementar
+    [fun m => ~ Q m] fornece o MENOR contraexemplo [m]. A minimalidade
+    vem do PBO na forma negativa [forall x, x < m -> ~ ~ Q x]; a
+    eliminação da dupla negação ([NNPP]) — usada somente aqui — a
+    converte para a forma positiva [forall x, x < m -> Q x], muito mais
+    conveniente nos pontos de uso. *)
+Lemma PBO_menor_contraexemplo:
+  PBO ->
+  forall (Q : nat -> Prop) (n : nat),
+    ~ Q n ->
+    exists m, ~ Q m /\ forall x, x < m -> Q x.
+Proof.
+  intros HPBO Q n HnQn.
+  assert (Hex: exists m, ~ Q m) by (exists n; exact HnQn).
+  destruct (HPBO (fun m => ~ Q m) Hex) as [m [HnQm Hmin]].
+  exists m. split.
+  - exact HnQm.
+  - intros x Hx.
+    apply NNPP.
+    apply Hmin.
+    exact Hx.
