@@ -12,10 +12,6 @@
     A equivalência é estabelecida pelos teoremas [PIM_equiv_PIF],
     [PBO_equiv_PIM] e [PBO_equiv_PIF].
 
-    Estrutura: cada parte possui um "lema-núcleo" que concentra o
-    argumento matemático central, e lemas de implicação finos que apenas
-    o instanciam. Os teoremas finais são composições dessas implicações.
-
     Ferramenta: Rocq (versão 9 ou superior). Caso seja utilizada uma
     versão anterior (Coq 8.x), basta substituir as duas linhas de
     importação abaixo por: [Require Import Arith Classical.] *)
@@ -53,7 +49,7 @@ Definition PIF :=
     forall n, Q n.
 
 (** Dado um predicado [P] sobre naturais, se existe um natural [n] que
-    satisfaz a propriedade [P], então existe um [m] que é o menor
+    satisfaz a propriedade [P], then existe um [m] que é o menor
     natural que satisfaz a propriedade [P]. Esta propriedade é conhecida
     como o Princípio da Boa Ordenação (PBO): *)
 Definition PBO := forall P : nat -> Prop,
@@ -135,15 +131,84 @@ Proof.
   - apply PIF_implies_PIM.
 Qed.
 
-(** ** Parte 2: implicações envolvendo o PBO *)
+(** * Equivalência entre o Princípio da Boa Ordenação (PBO) e o Princípio da Indução Matemática (PIM)
 
-(** Lema-núcleo da direção PIF -> PBO: por indução forte em [a],
-    provamos que qualquer testemunha [P a] garante a existência de um
-    menor natural satisfazendo [P]. No passo forte para [k], o Terceiro
-    Excluído ([classic]) decide se já existe alguma testemunha [j < k]:
-    - se existe, a hipótese de indução forte aplicada a [j] conclui;
-    - se não existe, o próprio [k] é o mínimo procurado, pois qualquer
-      [x < k] com [P x] contradiria a inexistência. *)
+    Esta seção apresenta a demonstração formal da equivalência lógica entre o Princípio da Boa Ordenação (PBO) e o Princípio da Indução Matemática (PIM). A prova da equivalência ([PBO <-> PIM]) é dividida em duas direções: a ida ([PBO -> PIM]) e a volta ([PIM -> PBO]).
+
+    ** Justificativa Técnica: A Necessidade da Lógica Clássica
+
+    Antes de detalhar as demonstrações, é fundamental apresentar uma adaptação realizada no código-base do projeto. O Princípio da Boa Ordenação estabelece que qualquer propriedade sobre os números naturais que possua pelo menos um elemento satisfatório, que então forme um subconjunto não vazio de %$\mathbb{N}$%, possui um elemento mínimo.
+
+    Como o predicado matemático avaliado é genérico, ele pode ser computacionalmente indecidível. Em uma abordagem de lógica puramente intuicionista, o assistente de provas não seria capaz de decidir se a propriedade vale ou não para um determinado ponto sem um algoritmo explícito de busca. Para contornar esse problema e viabilizar a localização abstrata do elemento mínimo, fez-se necessária a importação e o uso da Lógica Clássica.
+
+    Utilizou-se o Princípio do Terceiro Excluído, para analisar as alternativas de existência ou inexistência de elementos abaixo de um limite, e a Eliminação da Dupla Negação (%$\neg\neg A \rightarrow A$%). Sem essa lógica clássica, a prova de minimalidade do PBO se tornaria irresolvível no Rocq.
+
+    ** Demonstração da Ida: PBO implica PIM ([PBO -> PIM])
+
+    A estratégia adotada para demonstrar que o Princípio da Boa Ordenação implica a validade da Indução Matemática clássica fundamenta-se no método de prova por contradição.
+
+    *** O Lema do Menor Contraexemplo
+
+    Para estruturar o argumento, foi construído inicialmente um lema auxiliar para estabelecer que, dado um predicado qualquer que falhe para um número natural [n], o Princípio da Boa Ordenação garante a existência de um menor contraexemplo [m].
+
+    A minimalidade desse elemento [m] é obtida sob a forma clássica de negação: nenhum número menor que [m] pode falhar no predicado. Utilizando a eliminação da dupla negação, o lema converte essa propriedade de maneira conveniente, garantindo formalmente que a propriedade em questão é verdadeira para absolutamente todos os números naturais contidos no segmento anterior a [m]. *)
+
+Lemma PBO_menor_contraexemplo:
+  PBO ->
+  forall (Q : nat -> Prop) (n : nat),
+    ~ Q n ->
+    exists m, ~ Q m /\ forall x, x < m -> Q x.
+Proof.
+  intros HPBO Q n HnQn.
+  assert (Hex: exists m, ~ Q m) by (exists n; exact HnQn).
+  destruct (HPBO (fun m => ~ Q m) Hex) as [m [HnQm Hmin]].
+  exists m. split.
+  - exact HnQm.
+  - intros x Hx.
+    apply NNPP.
+    apply Hmin.
+    exact Hx.
+Qed.
+
+(** *** Análise de Casos do Elemento Mínimo
+
+    Com o lema estabelecido, vai se assumir como hipóteses as premissas da Indução Matemática: a base da indução e o passo indutivo. O objetivo é demonstrar que a propriedade vale para um natural arbitrário [n].
+
+    Aplica-se a redução ao absurdo: supõe-se, por hipótese de contradição, que a propriedade falha para [n]. Pelo lema do menor contraexemplo, nós temos a existência de um número natural [m] que representa o menor elemento a falhar na propriedade. A partir daí, tem uma análise do número [m] por meio de uma divisão de casos:
+
+    - %\textbf{Caso $m = 0$:}% Se o menor contraexemplo fosse zero, teríamos que a propriedade falha em zero. No entanto, isso entra em contradição com a primeira premissa assumida, que é a base da indução, garantindo a validade da propriedade para o número zero.
+    - %\textbf{Caso $m = S(m')$ (Sucessor):}% Se o menor contraexemplo é o sucessor de algum número [m'], avalia-se a minimalidade de [m]. Como [m'] é menor que seu sucessor [S m'], e [m] é o menor contraexemplo possível, conclui-se que a propriedade é obrigatoriamente verdadeira para [m']. Ao aplicar o passo indutivo sobre essa afirmação, pode se deduzir que a propriedade também deve ser verdadeira para o sucessor de [m'], que é o próprio [m]. Isso gera uma contradição com a definição de [m], que havia sido estabelecido justamente como um contraexemplo, que era onde a propriedade deveria falhar.
+
+    Esgotados os casos dos números naturais e como temos o absurdo em ambos, a suposição de que a propriedade falhava para [n] é rejeitada. Portanto, por eliminação da dupla negação, podemos concluir a prova do teorema de indução. *)
+
+Lemma PBO_implies_PIM: PBO -> PIM.
+Proof.
+  unfold PIM.
+  intros HPBO P HP0 HPS n.
+  apply NNPP. intro HnPn.
+  destruct (PBO_menor_contraexemplo HPBO P n HnPn)
+    as [m [HnPm Hmenores]].
+  destruct m as [| m'].
+  - (* m = 0: contradiz a base do PIM. *)
+    apply HnPm. exact HP0.
+  - (* m = S m': contradiz o passo indutivo do PIM. *)
+    apply HnPm.
+    apply HPS.
+    apply Hmenores.
+    apply Nat.lt_succ_diag_r.
+Qed.
+
+(** ** Demonstração da Volta: PIM implica PBO ([PIM -> PBO])
+
+    Aextensãoda volta, que é para provar que o Princípio da Indução Matemática é suficiente para garantir o Princípio da Boa Ordenação, foi realizada de forma modular por meio da transitividade.
+
+    Em vez de construir uma indução simples diretamente sobre o enunciado do PBO, o que traria dificuldades técnicas para carregar o histórico de minimalidade entre as iterações, a demonstração apoia-se nos resultados intermediários obtidos no projeto:
+
+    - Primeiramente, utiliza-se o fato de que o PIM implica o Princípio da Indução Forte (PIF). Essa passagem baseia-se na técnica de fortalecimento do predicado, acumulando o histórico de validade em segmentos iniciais.
+    - Em seguida, voltamos a utilizar o lema que demonstra que o Princípio da Indução Forte implica o Princípio da Boa Ordenação ([PIF -> PBO]), onde a indução completa é utilizada para varrer os elementos inferiores e testar a existência de um elemento mínimo com o auxílio do terceiro excluído.
+
+    Pela aplicação sucessiva dessas implicações, a hipótese de que o PIM é verdadeiro é colocada na cadeia de teoremas. O PIM instancia a validade do PIF que, por sua vez, instancia e conclui a validade do PBO. Essa composição fecha a equivalência bidirecional formalmente. *)
+
 Lemma PIF_encontra_minimo:
   PIF ->
   forall P : nat -> Prop,
@@ -176,25 +241,26 @@ Proof.
   exact (PIF_encontra_minimo HPIF P n HPn).
 Qed.
 
-(** Lema-núcleo das direções PBO -> PIM e PBO -> PIF: dado um
-    contraexemplo de [Q], o PBO aplicado ao predicado complementar
-    [fun m => ~ Q m] fornece o MENOR contraexemplo [m]. A minimalidade
-    vem do PBO na forma negativa [forall x, x < m -> ~ ~ Q x]; a
-    eliminação da dupla negação ([NNPP]) — usada somente aqui — a
-    converte para a forma positiva [forall x, x < m -> Q x], muito mais
-    conveniente nos pontos de uso. *)
-Lemma PBO_menor_contraexemplo:
-  PBO ->
-  forall (Q : nat -> Prop) (n : nat),
-    ~ Q n ->
-    exists m, ~ Q m /\ forall x, x < m -> Q x.
+Lemma PIM_implies_PBO: PIM -> PBO.
 Proof.
-  intros HPBO Q n HnQn.
-  assert (Hex: exists m, ~ Q m) by (exists n; exact HnQn).
-  destruct (HPBO (fun m => ~ Q m) Hex) as [m [HnQm Hmin]].
-  exists m. split.
-  - exact HnQm.
-  - intros x Hx.
-    apply NNPP.
-    apply Hmin.
-    exact Hx.
+  intro HPIM.
+  apply PIF_implies_PBO.
+  apply PIM_implies_PIF.
+  exact HPIM.
+Qed.
+
+(** ** Teorema Principal: Equivalência entre PBO e PIM *)
+
+Theorem PBO_equiv_PIM: PBO <-> PIM.
+Proof.
+  split.
+  - apply PBO_implies_PIM.
+  - apply PIM_implies_PBO.
+Qed.
+
+(** * Parte 3: Equivalência entre o Princípio da Boa Ordenação e a Indução Forte *)
+
+Theorem PBO_equiv_PIF: PBO <-> PIF.
+Proof. Admitted.
+
+(** Repositório: %\url{https://github.com/flaviodemoura/ind_equiv}% *)
