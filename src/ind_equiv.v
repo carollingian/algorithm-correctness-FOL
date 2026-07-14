@@ -1,6 +1,6 @@
-(** * Equivalência entre diferentes noções de indução
+(** * Introdução *)
 
-    Projeto de Lógica Computacional 1 (2026/1) — Tema 5
+(** * Equivalência entre diferentes noções de indução
 
     Este arquivo formaliza a equivalência entre três princípios sobre os
     números naturais:
@@ -52,11 +52,12 @@ Definition PIF :=
     satisfaz a propriedade [P], then existe um [m] que é o menor
     natural que satisfaz a propriedade [P]. Esta propriedade é conhecida
     como o Princípio da Boa Ordenação (PBO): *)
+
 Definition PBO := forall P : nat -> Prop,
   (exists n : nat, P n) ->
   exists m : nat, P m /\ forall x : nat, x < m -> ~ P x.
 
-(** ** Parte 1: PIM <-> PIF *)
+(** ** Equivalência entre o Princípio da Indução Matemática (PIM) e o Princípio da Indução Forte (PIF) *)
 
 (** O coração da direção PIM -> PIF é o truque de "fortalecer" o
     predicado: a indução simples não consegue provar [Q n] diretamente a
@@ -66,7 +67,7 @@ Definition PBO := forall P : nat -> Prop,
 
         [fun n => forall m, m < n -> Q m]
 
-    ("[Q] vale em todo o segmento inicial [[0, n)]"), que carrega o
+    ("[Q] vale em todo o segmento inicial [[0, n]]"), que carrega o
     histórico completo de uma iteração para a seguinte. *)
 Lemma PIM_acumula_historico:
   PIM ->
@@ -76,7 +77,7 @@ Lemma PIM_acumula_historico:
 Proof.
   intros HPIM Q Hpasso.
   apply (HPIM (fun n => forall m, m < n -> Q m)).
-  - (* Caso base: o segmento inicial [0, 0) é vazio, pois nenhum
+  - (* Caso base: o segmento inicial [0, 0] é vazio, pois nenhum
        natural é menor do que 0. *)
     intros m Hm.
     exfalso.
@@ -95,7 +96,7 @@ Proof.
 Qed.
 
 (** Com o histórico acumulado salvo ao alcance, [Q n] continuamos:
-    basta observar que [n] pertence ao segmento inicial [[0, S n)]. *)
+    basta observar que [n] pertence ao segmento inicial [[0, S n]]. *)
 Lemma PIM_implies_PIF: PIM -> PIF.
 Proof.
   unfold PIF.
@@ -131,7 +132,7 @@ Proof.
   - apply PIF_implies_PIM.
 Qed.
 
-(** * Equivalência entre o Princípio da Boa Ordenação (PBO) e o Princípio da Indução Matemática (PIM)
+(** ** Equivalência entre o Princípio da Boa Ordenação (PBO) e o Princípio da Indução Matemática (PIM)
 
     Esta seção apresenta a demonstração formal da equivalência lógica entre o Princípio da Boa Ordenação (PBO) e o Princípio da Indução Matemática (PIM). A prova da equivalência ([PBO <-> PIM]) é dividida em duas direções: a ida ([PBO -> PIM]) e a volta ([PIM -> PBO]).
 
@@ -170,7 +171,7 @@ Proof.
     exact Hx.
 Qed.
 
-(** *** Análise de Casos do Elemento Mínimo
+(** **** Análise de Casos do Elemento Mínimo
 
     Com o lema estabelecido, vai se assumir como hipóteses as premissas da Indução Matemática: a base da indução e o passo indutivo. O objetivo é demonstrar que a propriedade vale para um natural arbitrário [n].
 
@@ -198,7 +199,7 @@ Proof.
     apply Nat.lt_succ_diag_r.
 Qed.
 
-(** ** Demonstração da Volta: PIM implica PBO ([PIM -> PBO])
+(** *** Demonstração da Volta: PIM implica PBO ([PIM -> PBO])
 
     Aextensãoda volta, que é para provar que o Princípio da Indução Matemática é suficiente para garantir o Princípio da Boa Ordenação, foi realizada de forma modular por meio da transitividade.
 
@@ -249,7 +250,7 @@ Proof.
   exact HPIM.
 Qed.
 
-(** ** Teorema Principal: Equivalência entre PBO e PIM *)
+(** *** Teorema Principal: Equivalência entre PBO e PIM *)
 
 Theorem PBO_equiv_PIM: PBO <-> PIM.
 Proof.
@@ -258,9 +259,69 @@ Proof.
   - apply PIM_implies_PBO.
 Qed.
 
-(** * Parte 3: Equivalência entre o Princípio da Boa Ordenação e a Indução Forte *)
+(** ** Equivalência entre o Princípio da Boa Ordenação e a Indução Forte *)
+
+(** Finalmente, esta é a equivalência necessária para fechar o ciclo. A partir de agora, 
+a transitividade é a base da demonstração. Ao estabelecer que PBO <-> PIF, a lógica clássica 
+garante automaticamente que as três noções são equivalentes (PIM <-> PIF <-> PBO). 
+Não é necessário provar diretamente que PBO implica PIM, pois a transitividade já corrobora essa prova. *)
+
+(** *** Lema [PBO_implies_PIF] *)
+
+(** O objetivo deste lema é mostrar que, se todo subconjunto não-vazio de números naturais tem um menor 
+elemento (PBO), então o Princípio da Indução Forte (PIF) é válido. A estratégia utilizada aqui é 
+baseada em prova por contradição, utilizando a lógica clássica.
+
+Para provar o PIF, é necessário garantir que a propriedade [Q] é válida para todos os naturais, 
+assumindo apenas que o passo da indução é verdadeiro, ou seja, se [Q] é válido para 
+todos os naturais menores que [n], então [Q] é obrigatoriamente válida para [n].
+
+PBO prova disso a partir de:
+
+1. Assumir, por absurdo, que a propriedade [Q] não vale para todos os naturais. 
+   Então, o conjunto de contraexemplos (onde Q falha) não é vazio.
+
+2. Como esse conjunto de contraexemplos não é vazio, a premissa do PBO garante que ele 
+   deve possuir um menor elemento [m].
+
+3. Por [m] ser o menor elemento para o qual [Q] falha, é verdade absoluta 
+   que [Q] é verdadeira para todos os números menores que [m]. 
+
+4. A hipótese de indução forte afirma que, se a propriedade é válida para todos os antecessores
+   de [m], então ela tem que ser válida para [m].
+
+5. Daí, [Q(m)] tem que ser falsa, pois [m] foi definido como um contraexemplo e, 
+   ao mesmo tempo, [Q(m)] tem que ser verdadeira pela hipótese de indução.
+
+Essa contradição final compromete a suposição inicial de que existia um contraexemplo. Logo, o 
+conjunto contraexemplo é necessariamente vazio, provando que [Q] é 
+verdadeiro para todo e qualquer natural. *)
+
+Lemma PBO_implies_PIF: PBO -> PIF.
+Proof.
+  unfold PIF.
+  intros HPBO Q Hpasso n.
+  apply NNPP. intro HnQn.
+  destruct (PBO_menor_contraexemplo HPBO Q n HnQn)
+    as [m [HnQm Hmenores]].
+  apply HnQm.
+  apply Hpasso.
+  exact Hmenores.
+Qed.
+
+(** *** Teorema [PBO_equiv_PIF] *)
+
+(** Por fim, o teorema [PBO_equiv_PIF] estabelece a equivalência bidirecional formal por meio de:
+  - [split.]: divide a equivalênciaem suas duas direções: PBO -> PIF e PIF -> PBO.
+  - [apply PBO_implies_PIF.]: Resolve a ida utilizando o lema provado anteriormente.
+  - [apply PIF_implies_PBO.]: Resolve a volta utilizando o lema de que a Indução Forte implica 
+    na Boa Ordenação. *)
 
 Theorem PBO_equiv_PIF: PBO <-> PIF.
-Proof. Admitted.
+Proof.
+  split.
+  - apply PBO_implies_PIF.
+  - apply PIF_implies_PBO.
+Qed.
 
-(** Repositório: %\url{https://github.com/flaviodemoura/ind_equiv}% *)
+(** * Conclusão *)
