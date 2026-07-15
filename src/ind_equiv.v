@@ -348,4 +348,17 @@ Proof.
   - apply PIF_implies_PBO.
 Qed.
 
-(** * Conclusão *)
+(** * Conclusão
+  Este trabalho evidencia que o Princípio da Indução Matemática (PIM), o Princípio da Indução Forte (PIF) e o 
+  Princípio da Boa Ordenação (PBO) não são apenas conceitos isolados, mas sim formulações logicamente 
+  equivalentes do mesmo alicerce aritmético. Ao formalizar as implicações bidirecionais 
+  entre essas noções, demonstrou-se que assumir a validade de qualquer um desses princípios garante 
+  automaticamente a validade dos demais. Essa equivalência 
+  consolida a base teórica para a construção de provas matemáticas sobre o conjunto dos 
+  números naturais.
+
+  Além do valor puramente teórico, a estruturação formal dessas equivalências tem um impacto direto 
+  na forma como abordamos problemas complexos em matemática discreta e ciência da computação. A garantia de 
+  que PIM, PIF e PBO possuem exatamente o mesmo poder expressivo permite a escolha da abordagem mais 
+  adequada para cada demonstração, sem qualquer perda de lógica.
+ *)
