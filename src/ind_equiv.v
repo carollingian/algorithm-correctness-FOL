@@ -58,7 +58,14 @@ From Stdlib Require Import Classical.
 (* end hide *)
 
 (** Seja [P] uma propriedade sobre os números naturais. O Princípio da
-    Indução Matemática (PIM) pode ser enunciado da seguinte forma: *)
+    Indução Matemática (PIM) pode ser enunciado da seguinte forma:
+    Vamos escolher uma propriedade P sobre os números naturais 
+    com base nessa propriedade iremos provar o caso base [P 0]
+    se a propriedade vale para um numero k, ela tem força o suficiente para alcançar o próximo número, S k [forall k, P k -> P (S k)]
+    logo a nossa propriedade que foi provada vale para todos os números naturais [forall n, P n]
+    Colocando em um exemplo que podemos ver e testar agora mesmo seria com um dominó, todo mundo já fez alguma vez na vida quando teve um dominó para brincar(eu fazia muito), seria o seguinte:
+    Faça uma fileira de peças de dominó em linha reta, após isso vamos empurrar a primeira peça da fileira. O primeiro dominó cai(caso base).
+    Sempre que um dominó cai, ele derruba o próximo(passo indutivo). Com base na regra podemos concluir com os próprios olhos, que todos os dominós caem também. *)
 Definition PIM :=
   forall P: nat -> Prop,
     (P 0) ->
