@@ -1,11 +1,4 @@
 (** 
-    Projeto de Lógica Computacional 1 (2026/1) --- Tema 5
-
-    **Integrantes do Grupo:**
-    - Alexandre Oliveira Barbosa (Matrícula: 231003460)
-    - Carolina Fernandes de Campos (Matrícula: 221030830)
-    - Luis Filipe Silva de Andrade (Matrícula: 190091975)
- 
     * Introdução
 
     1. O Princípio da Indução Matemática (PIM)
