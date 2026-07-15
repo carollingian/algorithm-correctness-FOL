@@ -1,20 +1,28 @@
-(** * Introdução
+(** 
+    Projeto de Lógica Computacional 1 (2026/1) --- Tema 5
+
+    **Integrantes do Grupo:**
+    - Alexandre Oliveira Barbosa (Matrícula: 231003460)
+    - Carolina Fernandes de Campos (Matrícula: 221030830)
+    - Luis Filipe Silva de Andrade (Matrícula: 190091975)
+ 
+    * Introdução
 
     1. O Princípio da Indução Matemática (PIM)
     O Princípio da Indução Matemática (PIM) é um dos métodos de prova para demonstrar propriedades sobre conjuntos infinitos enumeráveis, como o conjunto dos números naturais ($\mathbb{N}$). A base intuitiva do PIM é parecida com uma fileira de dominós: se garantirmos que o primeiro dominó cai, que é o caso base, e que, sempre que um dominó qualquer cair, ele necessariamente derruba o seguinte, esse sendo o passo indutivo, então podemos concluir que todos os dominós da fileira vão cair.
-    Formalmente, para uma propriedade qualquer $P$, se provarmos que $P(0)$ é verdadeiro e que a implicação $\forall k, P(k) \to P(k+1)$ é válida, o princípio garante que $P(n)$ vale para todo $n \in \mathbb{N}$. O PIM serve não apenas para teoremas matemáticos puristas, mas também para a especificação e verificação de algoritmos recursivos e estruturas de dados indutivas em Ciência da Computação.
+    Formalmente, para uma propriedade qualquer $P$, se provarmos que $P(0)$ é verdadeiro e que a implicação $\forall k, P(k) \to P(k+1)$ é válida, o princípio garante que $P(n)$ vale para todo $n \in \mathbb{N}$. O PIM serve não apenas para teoremas matemáticos, mas também para a verificação de algoritmos recursivos e estruturas de dados indutivas na computação.
 
     2. O Princípio da Indução Forte (PIF)
-    Diferente da indução matemática simples, onde a prova do passo indutivo de um elemento depende do seu antecessor imediato, o Princípio da Indução Forte (PIF) expande essa hipótese. No PIF, para provar que uma propriedade $Q$ vale para um número $k$, tem como hipótese de indução que a propriedade é verdadeira para todos os números naturais menores que $k$.
-    Essa formulação é útil na computação ao analisar algoritmos cujas divisões de subproblemas não reduzem o tamanho da entrada em apenas uma unidade, como ocorre no algoritmo de ordenação QuickSort ou na fatoração de números primos em fatores primos. Basicamente, o PIF oferece uma hipótese indutiva muito mais robusta e flexível para o desenvolvimento de provas de correção de sistemas complexos.
+    Diferente da indução matemática simples, onde a prova do passo indutivo de um elemento depende do seu antecessor, o Princípio da Indução Forte (PIF) expande essa hipótese. No PIF, para provar que uma propriedade $Q$ vale para um número $k$, tem como hipótese de indução que a propriedade é verdadeira para todos os números naturais menores que $k$.
+    Isso é útil na computação ao analisar algoritmos cujas divisões de subproblemas não reduzem o tamanho da entrada em apenas uma unidade, como ocorre no algoritmo de ordenação QuickSort ou na fatoração de números primos em fatores primos. Basicamente, o PIF oferece uma hipótese indutiva muito mais robusta e flexível para o desenvolvimento de provas de correção de sistemas complexos.
 
-    3. O que significa os princípios serem "Equivalentes"?
-    Dizer que o Princípio da Indução Matemática (PIM), o Princípio da Indução Forte (PIF) e o Princípio da Boa Ordenação (PBO) são equivalentes significa afirmar que eles possuem a mesma força lógica e expressiva. De maneira formal, a equivalência estabelece que, se assumirmos qualquer um desses três princípios como um axioma verdadeiro, temos a capacidade de deduzir matematicamente a validade dos outros como teoremas.
-    Demonstrar essa equivalência ($\text{PIM} \leftrightarrow \text{PIF} \leftrightarrow \text{PBO}$) exige construir uma cadeia de implicações que feche um ciclo lógico, provando que $\text{PIM} \to \text{PIF}$, depois $\text{PIF} \to \text{PBO}$ e, finalmente, $\text{PBO} \to \text{PIM}$. Ao fechar essa transitividade, se prova que nenhum princípio é "mais forte" ou "mais fraco" que o outro na representation das propriedades aritméticas dos números naturais.
+    3. O que significa os princípios serem Equivalentes?
+    Dizer que o Princípio da Indução Matemática (PIM), o Princípio da Indução Forte (PIF) e o Princípio da Boa Ordenação (PBO) são equivalentes é mesmo que afirmar que eles possuem a mesma força lógica e expressiva. De maneira formal, a equivalência estabelece que, se assumirmos qualquer um desses três princípios como um axioma verdadeiro, temos a capacidade de deduzir matematicamente a validade dos outros como teoremas.
+    Demonstrar essa equivalência ($\text{PIM} \leftrightarrow \text{PIF} \leftrightarrow \text{PBO}$) exige construir implicações de tal forma que feche um ciclo lógico, provando que $\text{PIM} \to \text{PIF}$, depois $\text{PIF} \to \text{PBO}$ e, finalmente, $\text{PBO} \to \text{PIM}$. Ao fechar essa transitividade, se prova que nenhum princípio é "mais forte" ou "mais fraco" que o outro na representação das propriedades dos números naturais.
 
     4. O Assistente de Provas Rocq 
-    O Rocq é um assistente de provas interativo baseado no Cálculo de Construções Indutivas (CoIC), uma variante expressiva da teoria dos tipos. O sistema funciona sob o Isomorfismo de Curry-Howard, uma correspondência profunda entre lógica e computação que estabelece que proposições matemáticas equivalem a tipos de dados, enquanto as suas respectivas demonstrações equivalem a programas de computador executáveis.
-    Neste projeto, o Rocq atua como um juiz matemático. Ao contrário de uma prova manuscrita em papel, onde pequenos saltos lógicos ou ambiguidades textuais podem passar despercebidos, cada tática aplicada no Rocq é verificada pelo núcleo de checagem de tipos. Isso garante que, ao final da compilação do arquivo .v sem axiomas pendentes, a prova obtida seja matematicamente livre de erros humanos de dedução. *)
+    O Rocq é um assistente de provas baseado no Cálculo de Construções Indutivas (CoIC), uma variante expressiva da teoria dos tipos. O sistema funciona sob o Isomorfismo de Curry-Howard, uma correspondência entre lógica e computação que vai falar que proposições matemáticas equivalem a tipos de dados, enquanto as suas respectivas demonstrações equivalem a programas de computador.
+    Neste projeto, o Rocq atua quase como um juiz matemático. Ao contrário de uma prova no papel, onde pequenos saltos lógicos podem passar despercebidos, cada tática aplicada no Rocq é verificada pelo núcleo de checagem de tipos. Isso garante que, ao final da compilação do arquivo .v, se não tiver axiomas pendentes, a prova obtida é matematicamente livre de erros de dedução. *)
 
 (** * Equivalência entre diferentes noções de indução
 
